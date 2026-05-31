@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>车源管理 - 驰选二手车</title>
+  <style>
+    :root {
+      --ink: #172026;
+      --muted: #66737d;
+      --line: #d9e0e4;
+      --soft: #f5f7f8;
+      --brand: #0f766e;
+      --brand-deep: #0b4f49;
+      --accent: #c2410c;
+      --panel: #ffffff;
+      --shadow: 0 18px 45px rgba(23, 32, 38, .12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      background: var(--soft);
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, .94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 68px;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      font-size: 20px;
+    }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--brand);
+    }
+
+    .nav a {
+      color: var(--brand-deep);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .hero {
+      padding: 42px 0 26px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 54px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 720px;
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(340px, .98fr);
+      gap: 18px;
+      align-items: start;
+      padding-bottom: 48px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 10px 24px rgba(23, 32, 38, .06);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 18px 0;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .wide {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      color: #43515a;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid #cbd5db;
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fff;
+      padding: 0 12px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+      padding-top: 11px;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, .12);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 16px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--brand-deep);
+      font-weight: 900;
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: var(--brand);
+      box-shadow: 0 12px 26px rgba(15, 118, 110, .18);
+    }
+
+    .btn-danger {
+      color: #fff;
+      background: var(--accent);
+    }
+
+    .btn-light {
+      border-color: var(--line);
+    }
+
+    .status {
+      min-height: 24px;
+      margin: 12px 0 0;
+      color: var(--brand-deep);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .car-list {
+      display: grid;
+      gap: 12px;
+      max-height: 720px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .car-item {
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .car-item img {
+      width: 112px;
+      height: 82px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #e8eef0;
+    }
+
+    .car-item h3 {
+      margin: 0 0 6px;
+      font-size: 17px;
+      line-height: 1.24;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meta span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 8px;
+      background: #eef3f2;
+    }
+
+    .item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .item-actions .btn {
+      min-height: 34px;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    .tools {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .preview {
+      display: none;
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+
+    @media (max-width: 920px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        width: min(100% - 28px, 1180px);
+      }
+
+      .nav {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 14px 0;
+      }
+
+      .form-grid,
+      .car-item {
+        grid-template-columns: 1fr;
+      }
+
+      .car-item img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell nav">
+      <div class="brand">
+        <span class="mark">驰</span>
+        <span>车源管理</span>
+      </div>
+      <a href="index.html">返回网站首页</a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <h1>上传和管理车源</h1>
+      <p>这里可以新增、编辑、删除车源，并导出 `data/cars.js`。把导出的文件替换到网站同名位置后，再发布到 GitHub Pages，就能让别人看到最新车源。</p>
+    </section>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="panel-head">
+          <h2 id="formTitle">新增车源</h2>
+          <button class="btn btn-light" type="button" id="newBtn">新建</button>
+        </div>
+        <div class="panel-body">
+          <form id="carForm" novalidate>
+            <input type="hidden" id="carId">
+            <div class="form-grid">
+              <div class="field">
+                <label for="brand">品牌</label>
+                <input id="brand" placeholder="例如：奔驰">
+              </div>
+              <div class="field">
+                <label for="model">车型</label>
+                <input id="model" placeholder="例如：奔驰 C 260 L">
+              </div>
+              <div class="field">
+                <label for="year">年份</label>
+                <input id="year" type="number" min="2000" max="2035" placeholder="2023">
+              </div>
+              <div class="field">
+                <label for="mileage">里程（万公里）</label>
+                <input id="mileage" type="number" min="0" step="0.1" placeholder="2.8">
+              </div>
+              <div class="field">
+                <label for="price">价格（万元）</label>
+                <input id="price" type="number" min="0" step="0.1" placeholder="18.8">
+              </div>
+              <div class="field">
+                <label for="downPayment">首付（万元）</label>
+                <input id="downPayment" type="number" min="0" step="0.1" placeholder="3.8">
+              </div>
+              <div class="field">
+                <label for="tag">标签</label>
+                <input id="tag" placeholder="例如：一手车">
+              </div>
+              <div class="field">
+                <label for="color">颜色</label>
+                <input id="color" placeholder="例如：珍珠白">
+              </div>
+              <div class="field">
+                <label for="engine">动力</label>
+                <input id="engine" placeholder="例如：2.0T / 纯电">
+              </div>
+              <div class="field">
+                <label for="location">看车地点</label>
+                <input id="location" placeholder="例如：上海闵行">
+              </div>
+              <div class="field wide">
+                <label for="highlights">亮点（用逗号分隔）</label>
+                <input id="highlights" placeholder="原版原漆, 低里程, 支持分期">
+              </div>
+              <div class="field wide">
+                <label for="imageUrl">图片 URL</label>
+                <input id="imageUrl" placeholder="https://...">
+              </div>
+              <div class="field wide">
+                <label for="imageFile">本地图片上传</label>
+                <input id="imageFile" type="file" accept="image/*">
+                <p class="hint">选择图片后会转成可发布的数据图片，适合少量车源；大量高清图建议使用图片 URL。</p>
+                <img class="preview" id="preview" alt="车辆图片预览">
+              </div>
+              <div class="field wide">
+                <label for="description">车况描述</label>
+                <textarea id="description" placeholder="写清车况、配置、适合人群和卖点"></textarea>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-primary" type="submit">保存车源</button>
+              <button class="btn btn-light" type="button" id="exportBtn">导出 cars.js</button>
+              <button class="btn btn-light" type="button" id="copyBtn">复制数据</button>
+            </div>
+            <p class="status" id="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="panel-head">
+          <h2>当前车源</h2>
+          <span id="countText" class="hint"></span>
+        </div>
+        <div class="panel-body">
+          <div class="tools">
+            <p class="hint">本页会把草稿保存在当前浏览器。导出后将 `cars.js` 放到网站的 `data` 文件夹。</p>
+            <button class="btn btn-danger" type="button" id="clearDraftBtn">清空本地草稿</button>
+          </div>
+          <div class="car-list" id="carList"></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="data/cars.js"></script>
+  <script>
+    const STORAGE_KEY = "used-car-inventory";
+    const fallbackImage = "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1000&q=82";
+    let cars = loadCars();
+    let currentImage = "";
+
+    const form = document.querySelector("#carForm");
+    const formTitle = document.querySelector("#formTitle");
+    const statusEl = document.querySelector("#status");
+    const listEl = document.querySelector("#carList");
+    const countText = document.querySelector("#countText");
+    const preview = document.querySelector("#preview");
+
+    const fields = {
+      id: document.querySelector("#carId"),
+      brand: document.querySelector("#brand"),
+      model: document.querySelector("#model"),
+      year: document.querySelector("#year"),
+      mileage: document.querySelector("#mileage"),
+      price: document.querySelector("#price"),
+      downPayment: document.querySelector("#downPayment"),
+      tag: document.querySelector("#tag"),
+      color: document.querySelector("#color"),
+      engine: document.querySelector("#engine"),
+      location: document.querySelector("#location"),
+      highlights: document.querySelector("#highlights"),
+      imageUrl: document.querySelector("#imageUrl"),
+      imageFile: document.querySelector("#imageFile"),
+      description: document.querySelector("#description")
+    };
+
+    function loadCars() {
+      const draft = localStorage.getItem(STORAGE_KEY);
+      if (draft) {
+        try {
+          return JSON.parse(draft);
+        } catch (error) {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      }
+      return Array.isArray(window.CARS_DATA) ? window.CARS_DATA.map((car) => ({ ...car })) : [];
+    }
+
+    function saveDraft() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cars));
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    function toNumber(value) {
+      return Number.parseFloat(value || 0);
+    }
+
+    function nextId() {
+      return cars.length ? Math.max(...cars.map((car) => Number(car.id) || 0)) + 1 : 1;
+    }
+
+    function normalizeHighlights(value) {
+      return value
+        .split(/[,，]/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    function buildCarsFile() {
+      return `window.CARS_DATA = ${JSON.stringify(cars, null, 2)};\n`;
+    }
+
+    function downloadCarsFile() {
+      const blob = new Blob([buildCarsFile()], { type: "application/javascript;charset=utf-8" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "cars.js";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(link.href);
+      setStatus("已导出 cars.js，请替换 data 文件夹里的同名文件。");
+    }
+
+    async function copyCarsFile() {
+      await navigator.clipboard.writeText(buildCarsFile());
+      setStatus("车源数据已复制，可以粘贴到 data/cars.js。");
+    }
+
+    function showPreview(src) {
+      if (!src) {
+        preview.style.display = "none";
+        preview.removeAttribute("src");
+        return;
+      }
+      preview.src = src;
+      preview.style.display = "block";
+    }
+
+    function renderList() {
+      countText.textContent = `${cars.length} 台`;
+      listEl.innerHTML = cars.map((car) => `
+        <article class="car-item">
+          <img src="${car.image || fallbackImage}" alt="${car.model}">
+          <div>
+            <h3>${car.model || "未命名车源"}</h3>
+            <div class="meta">
+              <span>${car.brand || "品牌未填"}</span>
+              <span>${car.year || "-"} 年</span>
+              <span>${car.mileage || 0} 万公里</span>
+              <span>${car.price || 0} 万</span>
+            </div>
+            <div class="item-actions">
+              <button class="btn btn-light" type="button" data-edit="${car.id}">编辑</button>
+              <button class="btn btn-danger" type="button" data-delete="${car.id}">删除</button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function resetForm() {
+      form.reset();
+      fields.id.value = "";
+      currentImage = "";
+      formTitle.textContent = "新增车源";
+      showPreview("");
+      setStatus("");
+    }
+
+    function editCar(id) {
+      const car = cars.find((item) => Number(item.id) === Number(id));
+      if (!car) return;
+      fields.id.value = car.id;
+      fields.brand.value = car.brand || "";
+      fields.model.value = car.model || "";
+      fields.year.value = car.year || "";
+      fields.mileage.value = car.mileage || "";
+      fields.price.value = car.price || "";
+      fields.downPayment.value = car.downPayment || "";
+      fields.tag.value = car.tag || "";
+      fields.color.value = car.color || "";
+      fields.engine.value = car.engine || "";
+      fields.location.value = car.location || "";
+      fields.highlights.value = (car.highlights || []).join(", ");
+      fields.imageUrl.value = car.image || "";
+      fields.description.value = car.description || "";
+      currentImage = car.image || "";
+      formTitle.textContent = "编辑车源";
+      showPreview(currentImage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteCar(id) {
+      cars = cars.filter((car) => Number(car.id) !== Number(id));
+      saveDraft();
+      renderList();
+      resetForm();
+      setStatus("车源已删除，本地草稿已更新。");
+    }
+
+    function validate() {
+      if (!fields.brand.value.trim() || !fields.model.value.trim()) return "请填写品牌和车型。";
+      if (!fields.year.value || !fields.price.value) return "请填写年份和价格。";
+      if (!fields.imageUrl.value.trim() && !currentImage) return "请填写图片 URL 或上传一张图片。";
+      return "";
+    }
+
+    function collectCar() {
+      const id = fields.id.value ? Number(fields.id.value) : nextId();
+      return {
+        id,
+        brand: fields.brand.value.trim(),
+        model: fields.model.value.trim(),
+        year: Number.parseInt(fields.year.value, 10),
+        mileage: toNumber(fields.mileage.value),
+        price: toNumber(fields.price.value),
+        downPayment: toNumber(fields.downPayment.value),
+        tag: fields.tag.value.trim() || "精选车源",
+        image: fields.imageUrl.value.trim() || currentImage,
+        highlights: normalizeHighlights(fields.highlights.value),
+        color: fields.color.value.trim(),
+        engine: fields.engine.value.trim(),
+        location: fields.location.value.trim(),
+        description: fields.description.value.trim()
+      };
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const error = validate();
+      if (error) {
+        setStatus(error);
+        return;
+      }
+      const car = collectCar();
+      const index = cars.findIndex((item) => Number(item.id) === Number(car.id));
+      if (index >= 0) {
+        cars[index] = car;
+      } else {
+        cars.unshift(car);
+      }
+      saveDraft();
+      renderList();
+      resetForm();
+      setStatus("车源已保存。上线前请导出 cars.js 并替换网站文件。");
+    });
+
+    fields.imageFile.addEventListener("change", () => {
+      const file = fields.imageFile.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        currentImage = reader.result;
+        fields.imageUrl.value = "";
+        showPreview(currentImage);
+        setStatus("图片已加入当前车源。");
+      };
+      reader.readAsDataURL(file);
+    });
+
+    fields.imageUrl.addEventListener("input", () => {
+      currentImage = "";
+      showPreview(fields.imageUrl.value.trim());
+    });
+
+    listEl.addEventListener("click", (event) => {
+      const editId = event.target.dataset.edit;
+      const deleteId = event.target.dataset.delete;
+      if (editId) editCar(editId);
+      if (deleteId) deleteCar(deleteId);
+    });
+
+    document.querySelector("#newBtn").addEventListener("click", resetForm);
+    document.querySelector("#exportBtn").addEventListener("click", downloadCarsFile);
+    document.querySelector("#copyBtn").addEventListener("click", copyCarsFile);
+    document.querySelector("#clearDraftBtn").addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      cars = Array.isArray(window.CARS_DATA) ? window.CARS_DATA.map((car) => ({ ...car })) : [];
+      resetForm();
+      renderList();
+      setStatus("本地草稿已清空，已恢复 data/cars.js 中的车源。");
+    });
+
+    renderList();
+  </script>
+</body>
+</html>
